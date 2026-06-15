@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <time.h>
 
 void trim_newline(char *s);
 int set_socket_nonblocking(int fd, int enable);
