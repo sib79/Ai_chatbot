@@ -1,5 +1,7 @@
 #include "protocol.h"
 
+#include "utils.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -286,6 +288,7 @@ static int parse_three_fields_msg(const char *rest,
 int protocol_parse_server_line(const char *line, parsed_resp_t *out)
 {
     char cmd[16];
+    char work[MAX_LINE_LEN];
     const char *rest = NULL;
 
     if (line == NULL || out == NULL) {
@@ -293,8 +296,11 @@ int protocol_parse_server_line(const char *line, parsed_resp_t *out)
     }
 
     memset(out, 0, sizeof(*out));
+    strncpy(work, line, sizeof(work) - 1);
+    work[sizeof(work) - 1] = '\0';
+    trim_newline(work);
 
-    if (split_first_token(line, cmd, sizeof(cmd), &rest) != CHAT_OK) {
+    if (split_first_token(work, cmd, sizeof(cmd), &rest) != CHAT_OK) {
         return CHAT_ERR_PROTOCOL;
     }
 

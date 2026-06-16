@@ -52,7 +52,7 @@ int main(void)
                               protocol_parse_client_line("MSG Hello world", &cmd),
                               "parse MSG");
 
-    protocol_build_server_broadcast(buf, sizeof(buf), "alice", "2026-06-16 10:00:00",
+    protocol_build_server_broadcast(buf, sizeof(buf), "alice", "2026-06-16T10:00:00",
                                     "lobby", "hi all");
     failures += assert_eq_int(CHAT_OK, protocol_parse_server_line(buf, &resp),
                               "roundtrip BROADCAST");
@@ -60,7 +60,7 @@ int main(void)
     failures += assert_str_eq("lobby", resp.room, "BROADCAST room");
     failures += assert_str_eq("hi all", resp.message, "BROADCAST msg");
 
-    protocol_build_server_pm(buf, sizeof(buf), "bob", "2026-06-16 10:01:00", "secret");
+    protocol_build_server_pm(buf, sizeof(buf), "bob", "2026-06-16T10:01:00", "secret");
     failures += assert_eq_int(CHAT_OK, protocol_parse_server_line(buf, &resp), "parse PM resp");
     failures += assert_str_eq("bob", resp.from_user, "PM from");
     failures += assert_str_eq("secret", resp.message, "PM body");

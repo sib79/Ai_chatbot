@@ -118,10 +118,17 @@ int auth_init(auth_db_t *db, const char *path)
         rec->next = db->head;
         db->head = rec;
         user_count++;
+        fprintf(stderr, "[auth] user '%s'%s\n",
+                rec->username, rec->is_admin ? " (admin)" : "");
     }
 
     fclose(fp);
     fprintf(stderr, "[auth] loaded %zu users from %s\n", user_count, db_path);
+    if (user_count == 0) {
+        fprintf(stderr, "auth: no users loaded from %s (check format/path)\n", db_path);
+        auth_destroy(db);
+        return CHAT_ERR;
+    }
     return CHAT_OK;
 }
 

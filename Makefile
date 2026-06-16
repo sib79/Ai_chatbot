@@ -8,6 +8,7 @@ SERVER_BIN = $(BUILD_DIR)/chat_server
 CLIENT_BIN = $(BUILD_DIR)/chat_client
 TEST_PROTOCOL_BIN = $(BUILD_DIR)/test_protocol
 TEST_REGISTRY_BIN = $(BUILD_DIR)/test_registry
+TEST_AUTH_BIN = $(BUILD_DIR)/test_auth
 
 COMMON_SRCS = \
 	src/common/protocol.c \
@@ -61,11 +62,17 @@ $(TEST_REGISTRY_BIN): tests/test_registry.c $(BUILD_DIR)/server/client_registry.
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -o $@ tests/test_registry.c $(BUILD_DIR)/server/client_registry.o $(LDFLAGS)
 
-test: dirs $(TEST_PROTOCOL_BIN) $(TEST_REGISTRY_BIN)
+$(TEST_AUTH_BIN): tests/test_auth.c $(BUILD_DIR)/server/auth.o
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ tests/test_auth.c $(BUILD_DIR)/server/auth.o $(LDFLAGS) $(SERVER_LIBS)
+
+test: dirs $(TEST_PROTOCOL_BIN) $(TEST_REGISTRY_BIN) $(TEST_AUTH_BIN)
 	@echo "Running protocol tests..."
 	@$(TEST_PROTOCOL_BIN)
 	@echo "Running registry tests..."
 	@$(TEST_REGISTRY_BIN)
+	@echo "Running auth tests..."
+	@$(TEST_AUTH_BIN)
 
 clean:
 	rm -rf $(BUILD_DIR)

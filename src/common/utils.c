@@ -108,7 +108,7 @@ void format_timestamp(time_t t, char *buf, size_t buflen)
         return;
     }
 
-    strftime(buf, buflen, "%Y-%m-%d %H:%M:%S", &tm_info);
+    strftime(buf, buflen, "%Y-%m-%dT%H:%M:%S", &tm_info);
 }
 
 int parse_port(const char *s, uint16_t *port_out)
