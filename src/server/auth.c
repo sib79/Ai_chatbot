@@ -65,6 +65,7 @@ int auth_init(auth_db_t *db, const char *path)
     FILE *fp;
     char line[512];
     const char *db_path;
+    size_t user_count = 0;
 
     if (db == NULL) {
         return CHAT_ERR;
@@ -107,16 +108,20 @@ int auth_init(auth_db_t *db, const char *path)
         }
 
         strncpy(rec->username, username, MAX_USERNAME_LEN - 1);
+        rec->username[MAX_USERNAME_LEN - 1] = '\0';
         strncpy(rec->password_hash, hash, SHA256_HEX_LEN - 1);
+        rec->password_hash[SHA256_HEX_LEN - 1] = '\0';
         rec->is_admin = (admin_flag[0] == '1' ||
                          strcasecmp(admin_flag, "admin") == 0 ||
                          strcasecmp(admin_flag, "true") == 0 ||
                          strcasecmp(admin_flag, "yes") == 0);
         rec->next = db->head;
         db->head = rec;
+        user_count++;
     }
 
     fclose(fp);
+    fprintf(stderr, "[auth] loaded %zu users from %s\n", user_count, db_path);
     return CHAT_OK;
 }
 

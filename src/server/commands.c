@@ -35,17 +35,20 @@ int cmd_handle_auth(chat_server_t *srv, int fd,
 
     if (username[0] == '\0' || password[0] == '\0') {
         protocol_build_server_err(line, sizeof(line), "username and password required");
-        return cmd_send_response(fd, line);
+        cmd_send_response(fd, line);
+        return CHAT_ERR_AUTH;
     }
 
     if (auth_verify(&srv->auth, username, password) != CHAT_OK) {
         protocol_build_server_err(line, sizeof(line), "invalid credentials");
-        return cmd_send_response(fd, line);
+        cmd_send_response(fd, line);
+        return CHAT_ERR_AUTH;
     }
 
     if (registry_username_exists(&srv->registry, username)) {
         protocol_build_server_err(line, sizeof(line), "user already online");
-        return cmd_send_response(fd, line);
+        cmd_send_response(fd, line);
+        return CHAT_ERR_AUTH;
     }
 
     admin = auth_is_admin(&srv->auth, username);
@@ -55,7 +58,8 @@ int cmd_handle_auth(chat_server_t *srv, int fd,
         break;
     default:
         protocol_build_server_err(line, sizeof(line), "server full");
-        return cmd_send_response(fd, line);
+        cmd_send_response(fd, line);
+        return CHAT_ERR_AUTH;
     }
 
     protocol_build_server_welcome(line, sizeof(line), username);
