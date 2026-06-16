@@ -2,6 +2,8 @@
  * client.c - Advanced TCP chat client (auth, rooms, PM, colors, dual-thread I/O)
  */
 
+#define _POSIX_C_SOURCE 200809L
+
 #include "client.h"
 
 #include "colors.h"
@@ -149,12 +151,14 @@ static void print_history_payload(chat_client_t *cli, const char *payload)
             continue;
         }
         strncpy(user, tok, MAX_USERNAME_LEN - 1);
+        user[MAX_USERNAME_LEN - 1] = '\0';
         tok = strtok_r(NULL, "|", &s2);
         if (tok == NULL) {
             entry = strtok_r(NULL, "||", &save);
             continue;
         }
         strncpy(ts, tok, sizeof(ts) - 1);
+        ts[sizeof(ts) - 1] = '\0';
         msg = strtok_r(NULL, "|", &s2);
         if (msg != NULL) {
             client_print(cli, "%s[history %s] %s%s%s: %s\n",
@@ -172,6 +176,7 @@ static void display_server_message(chat_client_t *cli, const parsed_resp_t *resp
         pthread_mutex_lock(&cli->lock);
         cli->authenticated = 1;
         strncpy(cli->username, resp->username, MAX_USERNAME_LEN - 1);
+        cli->username[MAX_USERNAME_LEN - 1] = '\0';
         pthread_mutex_unlock(&cli->lock);
         client_print(cli, "\n%s*** Welcome, %s! ***%s\n> ",
                      C_GREEN, resp->username, C_RESET);
@@ -179,6 +184,7 @@ static void display_server_message(chat_client_t *cli, const parsed_resp_t *resp
     case RESP_ROOM_JOINED:
         pthread_mutex_lock(&cli->lock);
         strncpy(cli->current_room, resp->room, MAX_ROOM_NAME_LEN - 1);
+        cli->current_room[MAX_ROOM_NAME_LEN - 1] = '\0';
         cli->joined = 1;
         pthread_mutex_unlock(&cli->lock);
         client_print(cli, "\n%s*** Joined room: %s ***%s\n> ",
@@ -256,6 +262,7 @@ static int resolve_credentials(chat_client_t *cli,
 {
     if (user_override != NULL && user_override[0] != '\0') {
         strncpy(cli->username, user_override, MAX_USERNAME_LEN - 1);
+        cli->username[MAX_USERNAME_LEN - 1] = '\0';
     } else {
         printf("Username: ");
         fflush(stdout);
@@ -267,6 +274,7 @@ static int resolve_credentials(chat_client_t *cli,
 
     if (pass_override != NULL && pass_override[0] != '\0') {
         strncpy(cli->password, pass_override, MAX_PASSWORD_LEN - 1);
+        cli->password[MAX_PASSWORD_LEN - 1] = '\0';
     } else {
         printf("Password: ");
         fflush(stdout);
@@ -343,7 +351,7 @@ int client_connect(chat_client_t *cli, const char *host, uint16_t port)
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
-    snprintf(port_str, sizeof(port_str), "%u", port);
+    snprintf(port_str, sizeof(port_str), "%u", (unsigned)port);
 
     gai_err = getaddrinfo(host, port_str, &hints, &res);
     if (gai_err != 0) {
@@ -365,7 +373,7 @@ int client_connect(chat_client_t *cli, const char *host, uint16_t port)
     freeaddrinfo(res);
 
     if (fd < 0) {
-        fprintf(stderr, "Could not connect to %s:%u\n", host, port);
+        fprintf(stderr, "Could not connect to %s:%u\n", host, (unsigned)port);
         return CHAT_ERR;
     }
 
